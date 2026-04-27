@@ -1,9 +1,16 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "https://interview-plan-api.onrender.com",
-    withCredentials: true,
+    baseURL: "https://interview-plan-api.onrender.com"
 })
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 
 export const generateInterviewReport = async ({ jobDescription, selfDescription, resumeFile, title }) => {
