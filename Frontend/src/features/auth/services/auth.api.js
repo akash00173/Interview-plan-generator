@@ -1,19 +1,9 @@
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_API_URL 
-  ? import.meta.env.VITE_API_URL 
-  : "http://localhost:3000";
-
 const api = axios.create({
-  baseURL: baseURL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  }
+  baseURL: "https://interview-plan-api.onrender.com",
+  withCredentials: true
 })
-
-console.log("API Base URL:", baseURL);
 
 export async function register({username, email, password}) {
   const response = await api.post("/api/auth/register", {

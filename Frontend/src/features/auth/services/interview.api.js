@@ -1,10 +1,7 @@
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000";
-console.log("Interview API Base URL:", baseURL);
-
 const api = axios.create({
-    baseURL: baseURL,
+    baseURL: "https://interview-plan-api.onrender.com",
     withCredentials: true,
 })
 
