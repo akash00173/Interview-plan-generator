@@ -16,6 +16,10 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok" })
 })
 
+app.get("/test", (req, res) => {
+  res.json({ message: "Test route works!" })
+})
+
 // Simple test route
 app.post("/api/test-interview", express.json(), (req, res) => {
   res.json({
