@@ -5,7 +5,10 @@ const api = axios.create({
   withCredentials: true
 })
 
-console.log("Full login URL:", "https://interview-plan-api.onrender.com/api/auth/login")
+api.interceptors.request.use(config => {
+  console.log("Full request URL:", config.baseURL + config.url)
+  return config
+})
 
 export async function register({username, email, password}) {
   console.log("Calling register API...")
@@ -18,7 +21,7 @@ export async function register({username, email, password}) {
 }
 
 export async function login({email, password}) {
-  console.log("Calling login API with:", {email})
+  console.log("Attempting login to:", "https://interview-plan-api.onrender.com/api/auth/login")
   const response = await api.post("/api/auth/login", {
     email,
     password
