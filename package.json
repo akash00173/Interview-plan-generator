@@ -2,6 +2,7 @@
   "name": "interview-plan-generator",
   "version": "1.0.0",
   "scripts": {
+    "install:backend": "cd Backend && npm install",
     "start": "cd Backend && node server.js",
     "build": "cd Frontend && npm install && npm run build"
   }
