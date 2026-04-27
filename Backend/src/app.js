@@ -39,10 +39,13 @@ app.post("/api/test-interview", express.json(), (req, res) => {
 })
 
 const authRouter = require("./routes/auth.routes")
-
 const interviewRouter = require("./routes/interview.route")
+
+console.log("Registering routes...");
 
 app.use("/api/auth", authRouter)
 app.use("/api/interview", interviewRouter)
+
+console.log("Routes registered!");
 
 module.exports = app;

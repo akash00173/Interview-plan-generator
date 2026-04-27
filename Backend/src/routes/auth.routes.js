@@ -5,13 +5,13 @@ const authMiddleware = require("../middlewares/auth.middleware")
 const authRouter = Router();
 
 authRouter.post("/register", authController.registerUserController)
-
 authRouter.post("/login", authController.loginUserController)
-
 authRouter.get("/logout", authController.logoutUserController)
+authRouter.get("/get-me", authMiddleware.authUser, authController.getMeController)
 
-authRouter.get("/get-me",authMiddleware.authUser, authController.getMeController)
-
-
+// Test route to verify router works
+authRouter.get("/test", (req, res) => {
+  res.json({ message: "Auth router works!" })
+})
 
 module.exports = authRouter;
