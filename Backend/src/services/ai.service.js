@@ -61,7 +61,7 @@ async function sleep(ms) {
 
 async function generateWithRetry(prompt, maxRetries = 3) {
   const API_KEY = process.env.GOOGLE_API_KEY;
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+  const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
