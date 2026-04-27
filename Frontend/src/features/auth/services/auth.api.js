@@ -5,7 +5,10 @@ const api = axios.create({
   withCredentials: true
 })
 
+console.log("Full login URL:", "https://interview-plan-api.onrender.com/api/auth/login")
+
 export async function register({username, email, password}) {
+  console.log("Calling register API...")
   const response = await api.post("/api/auth/register", {
     username,
     email,
@@ -15,6 +18,7 @@ export async function register({username, email, password}) {
 }
 
 export async function login({email, password}) {
+  console.log("Calling login API with:", {email})
   const response = await api.post("/api/auth/login", {
     email,
     password
