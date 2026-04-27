@@ -70,9 +70,10 @@ async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function generateWithRetry(prompt, maxRetries = 3) {
+async function generateWithRetry(prompt, maxRetries = 5) {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
+      console.log(`Attempt ${attempt + 1}...`);
       const response = await ai.models.generateContent({
         model: "gemini-2.0-flash",
         contents: prompt,
@@ -83,10 +84,11 @@ async function generateWithRetry(prompt, maxRetries = 3) {
       });
       return JSON.parse(response.text);
     } catch (error) {
-      const errorStr = error.toString();
-      if (errorStr.includes("429") || errorStr.includes("rate limit") || errorStr.includes("429")) {
-        const waitTime = (attempt + 1) * 5000;
-        console.log(`Rate limited, retrying in ${waitTime/1000} seconds...`);
+      console.log("Error:", error.message || error.toString());
+      const errorMsg = (error.message || error.toString()).toLowerCase();
+      if (errorMsg.includes("429") || errorMsg.includes("rate limit") || errorMsg.includes("too many requests") || errorMsg.includes("unavailable")) {
+        const waitTime = (attempt + 1) * 15000;
+        console.log(`Rate limited, waiting ${waitTime/1000} seconds...`);
         await sleep(waitTime);
         continue;
       }
@@ -98,35 +100,17 @@ async function generateWithRetry(prompt, maxRetries = 3) {
 
 async function generateInterviewReport({resume, selfDescription, jobDescription}){
 
-  const prompt = `You are an expert career coach. Based on the following information, generate a comprehensive interview report.
+  const prompt = `You are an expert career coach. Generate a JSON with: matchScore (0-100), technicalQuestions (5 questions), behavioralQuestions (5 questions), skillGaps (3-5), preparationPlan (5 days).
 
-IMPORTANT: Return a VALID JSON object with this EXACT structure:
-{
-  "matchScore": 75,
-  "technicalQuestions": [
-    {"question": "...", "intention": "...", "answer": "..."}
-  ],
-  "behavioralQuestions": [
-    {"question": "...", "intention": "...", "answer": "..."}
-  ],
-  "skillGaps": [
-    {"skill": "...", "severity": "Low|Medium|High"}
-  ],
-  "preparationPlan": [
-    {"day": 1, "focus": "...", "tasks": ["task1", "task2"]}
-  ]
-}
+Return only valid JSON like:
+{"matchScore":75,"technicalQuestions":[{"question":"...","intention":"...","answer":"..."}],"behavioralQuestions":[],"skillGaps":[],"preparationPlan":[]}
 
-Candidate's Resume: ${resume}
-Candidate's Self-Description: ${selfDescription}
-Job Description: ${jobDescription}`
+Resume: ${resume}
+Job: ${jobDescription}`;
 
   console.log("=== Generating Interview Report ===");
   
   const parsedResponse = await generateWithRetry(prompt);
-  
-  console.log("=== AI Response Keys ===");
-  console.log(Object.keys(parsedResponse));
 
   return {
     matchScore: parsedResponse.matchScore || 0,
