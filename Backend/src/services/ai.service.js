@@ -4,34 +4,34 @@ async function generateInterviewReport({resume, selfDescription, jobDescription}
 
   const API_KEY = process.env.GOOGLE_API_KEY;
   
-  console.log("=== AI Service Debug ===");
-  console.log("API Key exists:", !!API_KEY);
-  console.log("API Key prefix:", API_KEY?.substring(0, 10));
-  
-  const prompt = `Create interview prep JSON: {matchScore, technicalQuestions, behavioralQuestions, skillGaps, preparationPlan}. Job: ${jobDescription.substring(0, 200)}`;
+  const prompt = `Create interview prep JSON with matchScore, technicalQuestions, behavioralQuestions, skillGaps, preparationPlan. Job: ${jobDescription.substring(0, 300)}`;
 
   try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-    
-    console.log("Calling Google API...");
+    // Try flash-2.0 model
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`;
     
     const response = await axios.post(url, {
-      contents: [{ parts: [{ text: prompt }] }]
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: {
+        responseMimeType: "application/json"
+      }
     });
 
-    console.log("Response received:", JSON.stringify(response.data).substring(0, 200));
-
     const text = response.data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) throw new Error("Empty response");
+    const jsonMatch = text?.match(/\{[\s\S]*\}/);
+    const parsed = JSON.parse(jsonMatch[0]);
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("No JSON found");
-
-    return JSON.parse(jsonMatch[0]);
+    return {
+      matchScore: parsed.matchScore || 0,
+      technicalQuestions: parsed.technicalQuestions || [],
+      behavioralQuestions: parsed.behavioralQuestions || [],
+      skillGaps: parsed.skillGaps || [],
+      preparationPlan: parsed.preparationPlan || []
+    };
     
   } catch (error) {
-    console.error("FULL ERROR:", JSON.stringify(error.response?.data, null, 2));
-    throw new Error("AI service failed");
+    console.error("Error:", error.response?.data?.error?.message || error.message);
+    throw new Error(error.response?.data?.error?.message || "AI failed");
   }
 }
 
