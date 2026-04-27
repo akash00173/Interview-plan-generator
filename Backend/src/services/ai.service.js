@@ -66,6 +66,36 @@ const interviewSchema = {
   required: ["matchScore", "technicalQuestions", "behavioralQuestions", "skillGaps", "preparationPlan"]
 };
 
+async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function generateWithRetry(prompt, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await ai.models.generateContent({
+        model: "gemini-2.0-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: interviewSchema
+        }
+      });
+      return JSON.parse(response.text);
+    } catch (error) {
+      const errorStr = error.toString();
+      if (errorStr.includes("429") || errorStr.includes("rate limit") || errorStr.includes("429")) {
+        const waitTime = (attempt + 1) * 5000;
+        console.log(`Rate limited, retrying in ${waitTime/1000} seconds...`);
+        await sleep(waitTime);
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error("Max retries exceeded due to rate limiting");
+}
+
 async function generateInterviewReport({resume, selfDescription, jobDescription}){
 
   const prompt = `You are an expert career coach. Based on the following information, generate a comprehensive interview report.
@@ -91,24 +121,13 @@ Candidate's Resume: ${resume}
 Candidate's Self-Description: ${selfDescription}
 Job Description: ${jobDescription}`
 
-  const response = await ai.models.generateContent({
-    model:"gemini-2.0-flash",
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema: interviewSchema
-    }
-  })
+  console.log("=== Generating Interview Report ===");
+  
+  const parsedResponse = await generateWithRetry(prompt);
+  
+  console.log("=== AI Response Keys ===");
+  console.log(Object.keys(parsedResponse));
 
-  console.log("=== AI Service Raw Response ===");
-  console.log("Raw text length:", response.text.length);
-  console.log("Raw text preview:", response.text.substring(0, 500));
-  
-  let parsedResponse = JSON.parse(response.text);
-  console.log("Parsed response keys:", Object.keys(parsedResponse));
-  console.log("Technical questions count:", parsedResponse.technicalQuestions?.length || 0);
-  console.log("First technical question:", JSON.stringify(parsedResponse.technicalQuestions?.[0], null, 2));
-  
   return {
     matchScore: parsedResponse.matchScore || 0,
     technicalQuestions: parsedResponse.technicalQuestions || [],
