@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "Frontend/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "build": {
+    "env": {
+      "VITE_API_URL": "@backend-url"
+    }
+  }
+}
