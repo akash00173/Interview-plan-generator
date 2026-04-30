@@ -1,9 +1,12 @@
 main{
   min-height: 100vh;
+  min-height: 100svh;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 1rem;
+  box-sizing: border-box;
 
   #email, #password, #username{
     background-color: #c0bbbb;
@@ -16,7 +19,9 @@ main{
   }
 
   .form-container{
-    min-width: 350px;
+    width: 100%;
+    max-width: 400px;
+    min-width: 280px;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -39,6 +44,9 @@ main{
       padding-inline: 1rem;
       padding-block: 0.75rem;
       border-radius: 0.75rem;
+      width: 100%;
+      box-sizing: border-box;
+      min-height: 44px;
     }
  }
 
@@ -49,3 +57,26 @@ main{
  }
 }
 
+@media (max-width: 480px) {
+  main {
+    padding: 0.75rem;
+
+    .form-container {
+      max-width: 100%;
+      gap: 1.25rem;
+    }
+
+    form {
+      gap: 0.75rem;
+    }
+
+    .input-group .input {
+      padding-inline: 0.85rem;
+      padding-block: 0.65rem;
+    }
+
+    a {
+      font-size: 0.85rem;
+    }
+  }
+}
